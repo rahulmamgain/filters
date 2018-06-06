@@ -1,13 +1,13 @@
 var util = require("../utils/utils");
 
 exports.config = {
-  type: "limit",
+  type: "queryLimit",
   config: {
     "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd": 10000
   },
   priority: 60,
   execute: function (req) {
-	console.log("RULE::limit Execute");
+    console.log("RULE::queryLimit Execute");
 	
     var currentUrl = req.url;
     var keys = Object.keys(this.config);
@@ -40,7 +40,7 @@ exports.config = {
         	qpLimit = req.body['limit'];
         	
         	console.log("qpLimit::", qpLimit);
-            console.log("configLimit::", this.config[wurl]);
+          console.log("configLimit::", this.config[wurl]);
         	
             if (qpLimit && Number.isInteger(qpLimit)) {
           	  isError = qpLimit > this.config[wurl];
@@ -52,7 +52,7 @@ exports.config = {
         }
       }
       
-      console.log("RULE::limit Execute. failed::", isError);
+      console.log("RULE::queryLimit Execute. failed::", isError);
       
       return isError;
     }

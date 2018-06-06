@@ -1,6 +1,6 @@
 var path = require("./rules/path.validator");
 var token = require("./rules/token.validator");
-var limit = require("./rules/rate-limitter");
+var queryLimit = require("./rules/query-param-limitter");
 var util = require("./utils/utils");
 
 var errorObj;
@@ -8,7 +8,7 @@ var errorObj;
 var RulesConfig = {
 	"path": path.config,
 	"token": token.config,
-	"limit": limit.config
+  "queryLimit": queryLimit.config
 };
 
 function execute(event, context, callback) {
@@ -46,7 +46,7 @@ function execute(event, context, callback) {
 					// if URL fall under inclusion list check for token and limit rules too
 					
 					rulesToApply.push(RulesConfig["token"]);
-					rulesToApply.push(RulesConfig["limit"]);
+          rulesToApply.push(RulesConfig["queryLimit"]);
 				}
 				
 				break;
@@ -62,8 +62,8 @@ function execute(event, context, callback) {
 				
 				break;
 				
-			case "limit": 
-				console.log("Query Rule limit executed");
+      case "queryLimit": 
+        console.log("Query Rule queryLimit executed");
 				
 				if (result) {
           setErrorFields(400, "Query params exceeded")
@@ -107,8 +107,9 @@ function setErrorFields(status, message) {
     }]
   }
 
-  let mockCallback = (param) => { 
-    console.log(param);
+  let mockCallback = (error, data) => { 
+    console.log(error);
+    console.log(data);
   }
 
   execute(mockEvent, {}, mockCallback);
