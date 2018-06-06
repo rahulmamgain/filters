@@ -55,10 +55,10 @@ function execute(event, context, callback) {
 
 				rulesToApply.push(RulesConfig["token"]);
 				rulesToApply.push(RulesConfig["queryLimit"]);
-				//rulesToApply.push(RulesConfig["rateLimit"]);
+				rulesToApply.push(RulesConfig["rateLimit"]);
 			} else if (result === "EXCLUDED") {
 				rulesToApply.push(RulesConfig["queryLimit"]);
-				//rulesToApply.push(RulesConfig["rateLimit"]);
+				rulesToApply.push(RulesConfig["rateLimit"]);
 			}
 
 			break;
