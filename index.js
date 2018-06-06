@@ -1,6 +1,7 @@
 var path = require("./rules/path.validator");
 var token = require("./rules/token.validator");
 var queryLimit = require("./rules/query-param-limitter");
+var rateLimit = require("./rules/rate-limitter");
 var util = require("./utils/utils");
 
 var errorObj;
@@ -8,17 +9,20 @@ var errorObj;
 var RulesConfig = {
 	"path": path.config,
 	"token": token.config,
-  "queryLimit": queryLimit.config
+  "queryLimit": queryLimit.config,
+  "rateLimit": rateLimit.config
 };
 
 function execute(event, context, callback) {
-  const req = event.Records[0].cf.request;
+  const request = event.Records[0].cf.request;
   var rulesToApply = [];
   var isErrorRequest = false;
   errorObj = {
     status: '',
     message: ''
   };
+
+  var timeout = setTimeout(function () { callback(null, request); context.done(); }, 1000);
 
 	rulesToApply.push(RulesConfig["path"]);
 
@@ -34,7 +38,7 @@ function execute(event, context, callback) {
 		console.log("After rules.length::", rulesToApply.length);
 		
 		// Execute rule
-		var result = rule.execute(req);
+		var result = rule.execute(request);
 		
 		// Handle results after the rules execution
 		switch(rule['type']) {
@@ -47,6 +51,7 @@ function execute(event, context, callback) {
 					
 					rulesToApply.push(RulesConfig["token"]);
           rulesToApply.push(RulesConfig["queryLimit"]);
+          rulesToApply.push(RulesConfig["rateLimit"]);
 				}
 				
 				break;
@@ -71,7 +76,10 @@ function execute(event, context, callback) {
           isErrorRequest = true;
 				}
 				
-				break;
+        break;
+        
+      case "rateLimit":
+        console.log("What?");
 				
 			default:
 				console.log("Alarm! Unknown rule got executed!");
@@ -81,7 +89,7 @@ function execute(event, context, callback) {
   if (isErrorRequest) {
     callback(null, errorObj);
   } else {
-    callback(null, req);
+    callback(null, request);
   }
 }
 
