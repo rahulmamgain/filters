@@ -64,41 +64,44 @@ var inclusionUrls = [{
 }];
 
 function execute(req) {
-  console.log("RULE::path Execute");
-  
-  var currentUrl = req.url;
-  var method = req.method;
-  var path = "INVALID";
-  var isInclusionURL = false;
-  
-  console.log("currentUrl::", currentUrl);
-  console.log("method::", method);
+  return new Promise((resolve, reject) => {
 
-  var isExclusionURL = this.exclusionUrls.some((item) => {
-    var wurl = item.path;
-    return ((currentUrl.indexOf(wurl) > -1) && item.methods.includes(method));
-  });
+    console.log("RULE::path Execute");
 
-  if (isExclusionURL) {
-	// If URL falls in exclusion list
-	  
-    path = "EXCLUDED";
-  } else {
-    isInclusionURL = this.inclusionUrls.some((item) => {
+    var currentUrl = req.url;
+    var method = req.method;
+    var path = "INVALID";
+    var isInclusionURL = false;
+
+    console.log("currentUrl::", currentUrl);
+    console.log("method::", method);
+
+    var isExclusionURL = this.exclusionUrls.some((item) => {
       var wurl = item.path;
-      return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
+      return ((currentUrl.indexOf(wurl) > -1) && item.methods.includes(method));
     });
 
-    if (isInclusionURL) {
-      // If URL falls in inclusion list
-    	
-      path = "INCLUDED";
-    }
-  }
-  
-  console.log("RULE::path Execute, path::", path);
+    if (isExclusionURL) {
+      // If URL falls in exclusion list
 
-  return path;
+      path = "EXCLUDED";
+    } else {
+      isInclusionURL = this.inclusionUrls.some((item) => {
+        var wurl = item.path;
+        return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
+      });
+
+      if (isInclusionURL) {
+        // If URL falls in inclusion list
+
+        path = "INCLUDED";
+      }
+    }
+
+    console.log("RULE::path Execute, path::", path);
+
+    resolve(path);
+  });
 }
 
 exports.config = {
