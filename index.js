@@ -107,7 +107,7 @@ rules.push(RulesConfig["path"]);
 while(rules.length > 0) {
 	rules = sortRulesByPriority(rules);
 	var rule = rules.shift();
-	var result = rules[0].handler(req);
+	var result = rule.handler(req);
 	
 	switch(rule[type]) {
 		case "path":
@@ -119,16 +119,18 @@ while(rules.length > 0) {
 			break;
 		case "token": 
 			console.log("Rule token executed");
-			if (result) {
-				
+			if (!result) {
+				throwError();
 			}
 			break;
 		case "limit": 
 			console.log("Rule limit executed");
+			if (result) {
+				throwError();
+			}
 			break;
 		default:
 			console.log("Unknown!");
-			
 	}
 	
 }
