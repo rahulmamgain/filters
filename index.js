@@ -1,7 +1,7 @@
 var path = require("./rules/path.validator");
 var token = require("./rules/token.validator");
 var queryLimit = require("./rules/query-param-limitter");
-var rateLimit = {}; //require("./rules/rate-limitter");
+var rateLimit = require("./rules/rate-limitter");
 var util = require("./utils/utils");
 
 var RulesConfig = {
@@ -23,10 +23,10 @@ function execute(event, context, callback) {
 		message : ''
 	};
 
-	var timeout = setTimeout(function() {
-		callback(null, request);
-		context.done();
-	}, 1000);
+	// var timeout = setTimeout(function() {
+	// 	callback(null, request);
+	// 	context.done();
+	// }, 1000);
 
 	rulesToApply.push(RulesConfig["path"]);
 
