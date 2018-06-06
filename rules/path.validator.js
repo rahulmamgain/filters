@@ -1,4 +1,4 @@
-var inclusionUrls =
+var exclusionUrls =
   [
     {
       path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
@@ -58,35 +58,45 @@ var inclusionUrls =
     }
   ];
 
-var exclusionUrls = [{
-  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
+var inclusionUrls = [{
+  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd",
   methods: ["GET"]
 }];
 
-function handler(req) {
+function execute(req) {
+  console.log("RULE::path Execute");
+  
   var currentUrl = req.url;
   var method = req.method;
   var path = "INVALID";
+  var isInclusionURL = false;
+  
+  console.log("currentUrl::", currentUrl);
+  console.log("method::", method);
 
-  var isExclusionURL = this.exclusion.some((item) => {
+  var isExclusionURL = this.exclusionUrls.some((item) => {
     var wurl = item.path;
-    return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
+    return ((currentUrl.indexOf(wurl) > -1) && item.methods.includes(method));
   });
 
-  var isInclusionURL = false;
-
   if (isExclusionURL) {
+	// If URL falls in exclusion list
+	  
     path = "EXCLUDED";
   } else {
-    isInclusionURL = this.inclusion.some((item) => {
+    isInclusionURL = this.inclusionUrls.some((item) => {
       var wurl = item.path;
       return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
     });
 
     if (isInclusionURL) {
+      // If URL falls in inclusion list
+    	
       path = "INCLUDED";
     }
   }
+  
+  console.log("RULE::path Execute, path::", path);
 
   return path;
 }
@@ -94,7 +104,7 @@ function handler(req) {
 exports.config = {
   type: "path",
   priority: 100,
-  inclusion: inclusionUrls,
-  exclusion: exclusionUrls,
-  handler: handler
+  inclusionUrls,
+  exclusionUrls,
+  execute
 };
