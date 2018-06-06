@@ -3,7 +3,7 @@ var util = require("../utils/utils");
 exports.config = {
   type: "queryLimit",
   config: {
-    "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd": 10000
+    "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize": 10000
   },
   priority: 60,
   execute: function (req) {
@@ -13,10 +13,10 @@ exports.config = {
     var keys = Object.keys(this.config);
     var isError = false;
     
-    for (var i = 0, wurl; i < keys.length; i++) {
-      wurl = keys[i];
+    for (var i = 0, url; i < keys.length; i++) {
+      url = keys[i];
     
-      if (currentUrl.indexOf(wurl) > -1) {
+      if (currentUrl.indexOf(url) > -1) {
         var params = util.getParams(currentUrl.split("?")[1]);
         var qpLimit = '';
         
@@ -28,10 +28,10 @@ exports.config = {
           qpLimit = parseInt(params['limit'], 10);
           
           console.log("qpLimit::", qpLimit);
-          console.log("configLimit::", this.config[wurl]);
+          console.log("configLimit::", this.config[url]);
           
           if (qpLimit && Number.isInteger(qpLimit)) {
-        	  isError = qpLimit > this.config[wurl];
+        	  isError = qpLimit > this.config[url];
           }
           
         } else if (req.method === "POST" && req.body['limit']) {
@@ -40,10 +40,10 @@ exports.config = {
         	qpLimit = req.body['limit'];
         	
         	console.log("qpLimit::", qpLimit);
-          console.log("configLimit::", this.config[wurl]);
+          console.log("configLimit::", this.config[url]);
         	
             if (qpLimit && Number.isInteger(qpLimit)) {
-          	  isError = qpLimit > this.config[wurl];
+          	  isError = qpLimit > this.config[url];
             }
         } else {
         	// Required value limit is not present
@@ -54,8 +54,12 @@ exports.config = {
       
       console.log("RULE::queryLimit Execute. failed::", isError);
       
-      return isError;
+      if (isError) {
+    	  break;
+      }
     }
+    
+    return isError;
   }
 
 };
