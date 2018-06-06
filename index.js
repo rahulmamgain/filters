@@ -5,7 +5,60 @@ var RulesConfig = {
 		inclusion: [{
 			  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
 			  methods: ["GET"]
-			}],
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/self",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/org",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/geolocation/countries/all",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/signUp",
+        methods: ["POST"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/resendVerifyRegistrationMail",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/login",
+        methods: ["POST"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/forgotpassword",
+        methods: ["GET", "POST", "PUT"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/verifySignup",
+        methods: ["POST"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/logout",
+        methods: ["POST"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/orcid",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/orcid/callback",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/saml/",
+        methods: ["GET"]
+      },
+      {
+        path: "https://api.taylorandfrancis.com/v2/auth/user/auth/saml/callback",
+        methods: ["POST"]
+      }
+    ],
 		exclusion: [{
 		  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
 		  methods: ["GET"]
