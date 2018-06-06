@@ -1,42 +1,11 @@
 import { config as pathConfig } from "./rules/path.validator";
+import { config as tokenConfig } from "./rules/token.validator";
+import { config as limitConfig } from "./rules/rate-limitter";
+
 var RulesConfig = {
 	"path": pathConfig,
-	
-	"token": {
-		type: "token",
-		priority: 80,
-		handler: function(req) {
-			return (req.headers["Authorization"]? true: false);
-		}
-		
-	},
-	
-	"limit": {
-		type: "limit",
-		config: {
-			"search": 10000,
-			"entitlements": 1000
-		},
-		priority: 60,
-		handler: function(req) {
-			var currentUrl = req.url;
-			var keys = config.keys();
-			var isError = false;
-			for(var i =0, wurl; i < keys.length; i++) {
-				wurl = keys[i];
-				if (currentUrl.indexof(wurl) > -1) {
-					var params = getParams(currentUrl.split("?")[1]);
-					
-					if (params && params.length) {
-						isError = params['limit'] > config[wurl];
-					}
-				}
-				
-				return isError;
-			}
-		}
-		
-	}
+	"token": tokenConfig,
+	"limit": limitConfig
 };
 
 function getParams(query) {
