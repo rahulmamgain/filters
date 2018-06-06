@@ -1,14 +1,23 @@
 var RulesConfig = {
-	Path: {
+	"path": {
+		type: "path",
 		priority: 100,
-		inclusion: [],
-		exclusion: [],
+		inclusion: [{
+			  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
+			  methods: ["GET"]
+			}],
+		exclusion: [{
+		  path: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize",
+		  methods: ["GET"]
+		}],
 		handler: function(req) {
 			var currentUrl = req.url;
+			var method = req.method;
 			var path = "INVALID";
 			
-			var isExclusionURL = this.exclusion.some((wurl) => {
-				return currentUrl.indexof(wurl) > -1;
+			var isExclusionURL = this.exclusion.some((item) => {
+				var wurl = item.path;
+				return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
 			});
 			
 			var isInclusionURL = false;
@@ -16,8 +25,9 @@ var RulesConfig = {
 			if (isExclusionURL) {
 				path = "EXCLUDED"; 
 			} else {
-				isInclusionURL  = this.inclusion.some((wurl) => {
-					return currentUrl.indexof(wurl) > -1;
+				isInclusionURL  = this.inclusion.some((item) => {
+					var wurl = item.path;
+					return (currentUrl.indexOf(wurl) > -1 && item.methods.includes(method));
 				});
 				
 				if (isInclusionURL) {
@@ -29,15 +39,17 @@ var RulesConfig = {
 		}		
 	},
 	
-	Token: {
+	"token": {
+		type: "token",
 		priority: 80,
 		handler: function(req) {
-			return (req.header.token? true: false);
+			return (req.headers["Authorization"]? true: false);
 		}
 		
 	},
 	
-	limit: {
+	"limit": {
+		type: "limit",
 		config: {
 			"search": 10000,
 			"entitlements": 1000
@@ -79,14 +91,47 @@ function getParams(query) {
 
 function sortRulesByPriority(rules) {
   rules.sort((r1, r2) => {
-    return r1.priority - r2.priority;
+    return r2.priority - r1.priority;
   })
 
-  return rules.slice();
+  return rules;
+}
+
+function throwError() {
+	console.log("Error thrown");
 }
 
 var rules = [];
-rules.push(RulesConfig.Path);
+rules.push(RulesConfig["path"]);
+
+while(rules.length > 0) {
+	rules = sortRulesByPriority(rules);
+	var rule = rules.shift();
+	var result = rules[0].handler(req);
+	
+	switch(rule[type]) {
+		case "path":
+			console.log("Rule path executed");
+			if (result === "INCLUDED") {
+				rules.push(RulesConfig["token"]);
+				rules.push(RulesConfig["limit"]);
+			}
+			break;
+		case "token": 
+			console.log("Rule token executed");
+			if (result) {
+				
+			}
+			break;
+		case "limit": 
+			console.log("Rule limit executed");
+			break;
+		default:
+			console.log("Unknown!");
+			
+	}
+	
+}
 
 
 
