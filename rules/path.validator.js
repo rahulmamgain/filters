@@ -91,10 +91,10 @@ function handler(req) {
   return path;
 }
 
-export var config = {
+exports.config = {
   type: "path",
   priority: 100,
   inclusion: inclusionUrls,
   exclusion: exclusionUrls,
   handler: handler
-}
+};

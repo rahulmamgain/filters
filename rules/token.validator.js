@@ -1,4 +1,4 @@
-export var config = {
+exports.config = {
   type: "token",
   priority: 80,
   handler: function (req) {

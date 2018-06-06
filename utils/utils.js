@@ -23,4 +23,6 @@ function throwError() {
 	console.log("Error thrown");
 }
 
-export {getParams, sortRulesByPriority, throwError};
+exports.throwError = throwError;
+exports.sortRulesByPriority = sortRulesByPriority;
+exports.getParams = getParams;
