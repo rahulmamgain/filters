@@ -78,13 +78,19 @@ function getParams(query) {
 }
 
 function sortRulesByPriority(rules) {
-	rules.sort((r1, r2) => {
-		return r1.priority - r2.priority;
-	})
+  rules.sort((r1, r2) => {
+    return r1.priority - r2.priority;
+  })
 
-	return rules.slice();
+  return rules.slice();
 }
-
 
 var rules = [];
 rules.push(RulesConfig.Path);
+
+
+
+
+
+
+
