@@ -27,10 +27,10 @@ function execute(event, context, callback) {
 		message : ''
 	};
 
-	// var timeout = setTimeout(function() {
-	// 	callback(null, request);
-	// 	context.done();
-	// }, 1000);
+	var timeout = setTimeout(function() {
+		callback(null, request);
+		context.done();
+	}, 1000);
 
 	var result = RulesConfig["path"].execute(request);
 	if (result === "INCLUDED") {
@@ -49,11 +49,13 @@ function execute(event, context, callback) {
 	promiseSerialify(ruleFunctions)
 		.then(() => {
 			console.log('All functions executed successfully');
+			clearTimeout(timeout);
 			rulesToApply = [];
 			callback(null, request);
 		})
 		.catch((err) => {
 			console.log('Failure');
+			clearTimeout(timeout);
 			rulesToApply = [];
 			callback(null, err);
 		});
