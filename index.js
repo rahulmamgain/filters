@@ -36,11 +36,10 @@ function execute(event, context, callback) {
 	if (result === "INCLUDED") {
 		rulesToApply.push(RulesConfig["queryLimit"]);
 		rulesToApply.push(RulesConfig["token"]);
-		
-		//rulesToApply.push(RulesConfig["rateLimit"].execute);
+		rulesToApply.push(RulesConfig["rateLimit"]);
 	} else if (result === "EXCLUDED") {
 		rulesToApply.push(RulesConfig["queryLimit"]);
-		//rulesToApply.push(RulesConfig["rateLimit"].execute);
+		rulesToApply.push(RulesConfig["rateLimit"]);
 	}
 
 	rulesToApply = util.sortRulesByPriority(rulesToApply);
@@ -72,10 +71,11 @@ function convertRulesToFunctionsAndBindRequest(rulesToApply, request) {
 
 (function main() {
 	var mockRequest = {
-		url: "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd?limit=1000",
+		url: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=1000",
 		method : "GET",
 		headers : {
-			Authorization : "dsfgdsfg"
+			Authorization : "dsfgdsfg",
+			'x-forwarded-for': '10.20.30.40'
 		}
 	};
 
@@ -92,6 +92,6 @@ function convertRulesToFunctionsAndBindRequest(rulesToApply, request) {
 		console.log(data);
 	}
 
-	execute(mockEvent, {}, mockCallback);
+	execute(mockEvent, {done(){}}, mockCallback);
 
 })();

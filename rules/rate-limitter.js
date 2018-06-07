@@ -142,7 +142,7 @@ function execute(request) {
 		      if (count > max_rate) {
 		        reject({
 			          status: '429',
-			          statusDescription: 'Rate limit exceeded',
+			          message: 'Rate limit exceeded',
 			    });
 		      }
 		      else {
