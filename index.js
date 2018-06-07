@@ -15,7 +15,7 @@ const promiseSerialify = funcs =>
 	funcs.reduce((promise, func) =>
 		promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([]))
 
-function execute(event, context, callback) {
+exports.handler = (event, context, callback) => {
 	const request = event.Records[0].cf.request;
 
 	var rulesToApply = [];
@@ -69,29 +69,3 @@ function convertRulesToFunctionsAndBindRequest(rulesToApply, request) {
 	return funcs;
 }
 
-(function main() {
-	var mockRequest = {
-		url: "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=1000",
-		method : "GET",
-		headers : {
-			Authorization : "dsfgdsfg",
-			'x-forwarded-for': '10.20.30.40'
-		}
-	};
-
-	var mockEvent = {
-		Records : [ {
-			cf : {
-				request : mockRequest
-			}
-		} ]
-	}
-
-	let mockCallback = (error, data) => {
-		console.log(error);
-		console.log(data);
-	}
-
-	execute(mockEvent, {done(){}}, mockCallback);
-
-})();
