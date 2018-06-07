@@ -10,11 +10,7 @@ exports.config = {
 
       console.log("RULE::token Execute. token::", isTokenPresent);
 
-      if(isTokenPresent) {
-        resolve();
-      } else {
-        reject();
-      }
+      resolve(isTokenPresent);
     });
   }
 };

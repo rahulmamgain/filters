@@ -140,10 +140,7 @@ function execute(request) {
 
 		      //console.log("DEBUG: About to return control at: " + (new Date().getTime() - start) + "ms");
 		      if (count > max_rate) {
-		        reject({
-			          status: '429',
-			          statusDescription: 'Rate limit exceeded',
-			    });
+		    	  resolve({error: true});
 		      }
 		      else {
 		    	  resolve();

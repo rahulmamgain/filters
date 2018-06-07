@@ -11,94 +11,116 @@ var RulesConfig = {
 	"rateLimit" : rateLimit.config
 };
 
+var isErrorRequest, errorObj;
+
 function execute(event, context, callback) {
 	const request = event.Records[0].cf.request;
 
 	var rulesToApply = [];
 
-	var isErrorRequest = false;
+	isErrorRequest = false;
 
 	errorObj = {
 		status : '',
 		message : ''
 	};
 
-	// var timeout = setTimeout(function() {
-	// 	callback(null, request);
-	// 	context.done();
-	// }, 1000);
+	var timeout = setTimeout(function() {
+		callback(null, request);
+	 	// context.done();
+	}, 1000);
 
 	rulesToApply.push(RulesConfig["path"]);
 
-	while (rulesToApply.length > 0) {
-		// Sort the rules to apply based on priority
-		rulesToApply = util.sortRulesByPriority(rulesToApply);
+	recursiveExec(rulesToApply, request, context, callback, timeout);
+	
+}
 
-		console.log("Before rules.length::", rulesToApply.length);
+function recursiveExec(rulesToApply, request, context, callback, timeout) {
+	
+	if (rulesToApply && rulesToApply.length === 0) {
+		clearTimeout(timeout);
+		
+		if (isErrorRequest) {
+			callback(null, errorObj);
+		} else {
+			callback(null, request);
+		}
+		
+		return;
+	}
 
-		// Extract highest priority rules for execution
-		var rule = rulesToApply.shift();
+	// Sort the rules to apply based on priority
+	rulesToApply = util.sortRulesByPriority(rulesToApply);
 
-		console.log("After rules.length::", rulesToApply.length);
+	console.log("Before rules.length::", rulesToApply.length);
 
-		// Execute rule
-		var result = rule.execute(request);
+	// Extract highest priority rules for execution
+	var rule = rulesToApply.shift();
 
+	console.log("After rules.length::", rulesToApply.length);
+
+	// Execute rule
+	var resultPromise = rule.execute(request);
+	
+	resultPromise.then((result) => {
 		// Handle results after the rules execution
 		switch (rule['type']) {
 
-		case "path":
-			console.log("Rule path executed");
-
-			if (result === "INCLUDED") {
-				// if URL fall under inclusion list check for token and limit rules too
-
-				rulesToApply.push(RulesConfig["token"]);
-				rulesToApply.push(RulesConfig["queryLimit"]);
-				rulesToApply.push(RulesConfig["rateLimit"]);
-			} else if (result === "EXCLUDED") {
-				rulesToApply.push(RulesConfig["queryLimit"]);
-				rulesToApply.push(RulesConfig["rateLimit"]);
-			}
-
-			break;
-
-		case "token":
-			console.log("Rule token executed");
-
-			if (!result) {
-				setErrorFields(400, "JWT Token not present")
-				rulesToApply = [];
-				isErrorRequest = true;
-			}
-
-			break;
-
-		case "queryLimit":
-			console.log("Query Rule queryLimit executed");
-
-			if (result) {
-				setErrorFields(400, "Query params exceeded")
-				rulesToApply = [];
-				isErrorRequest = true;
-			}
-
-			break;
-
-		case "rateLimit":
-			console.log("What?");
-
-		default:
-			console.log("Alarm! Unknown rule got executed!");
+			case "path":
+				console.log("Rule path executed");
+	
+				if (result === "INCLUDED") {
+					// if URL fall under inclusion list check for token and limit rules too
+	
+					rulesToApply.push(RulesConfig["token"]);
+					rulesToApply.push(RulesConfig["queryLimit"]);
+					rulesToApply.push(RulesConfig["rateLimit"]);
+				} else if (result === "EXCLUDED") {
+					rulesToApply.push(RulesConfig["queryLimit"]);
+					rulesToApply.push(RulesConfig["rateLimit"]);
+				}
+	
+				break;
+	
+			case "token":
+				console.log("Rule token executed");
+	
+				if (!result) {
+					setErrorFields(400, "JWT Token not present")
+					rulesToApply = [];
+					isErrorRequest = true;
+				}
+	
+				break;
+	
+			case "queryLimit":
+				console.log("Query Rule queryLimit executed");
+	
+				if (result) {
+					setErrorFields(400, "Query params exceeded")
+					rulesToApply = [];
+					isErrorRequest = true;
+				}
+	
+				break;
+	
+			case "rateLimit":
+				if (result && result.error) {
+					setErrorFields(429, "Rate limit exceeded")
+					rulesToApply = [];
+					isErrorRequest = true;
+				}
+			default:
+				console.log("Alarm! Unknown rule got executed!");
 		}
-	}
-
-	// 
-	if (isErrorRequest) {
-		callback(null, errorObj);
-	} else {
+		
+		recursiveExec(rulesToApply, request, context, callback, timeout);
+		
+	}).catch((error) => {
+		console.log('error');
 		callback(null, request);
-	}
+	});
 }
 
 function setErrorFields(status, message) {
@@ -108,7 +130,7 @@ function setErrorFields(status, message) {
 
 (function main() {
 	var mockRequest = {
-		url : "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=11000",
+		url : "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=10000",
 		method : "GET",
 		headers : {
 			Authorization : "dsfgdsfg"

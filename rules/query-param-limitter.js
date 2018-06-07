@@ -61,11 +61,7 @@ exports.config = {
         }
       }
 
-      if(isError) {
-        reject();
-      } else {
-        resolve();
-      }
+      resolve(isError);
     })
   }
 
