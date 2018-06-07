@@ -64,8 +64,6 @@ var inclusionUrls = [{
 }];
 
 function execute(req) {
-  return new Promise((resolve, reject) => {
-
     console.log("RULE::path Execute");
 
     var currentUrl = req.url;
@@ -100,8 +98,7 @@ function execute(req) {
 
     console.log("RULE::path Execute, path::", path);
 
-    resolve(path);
-  });
+    return path;
 }
 
 exports.config = {

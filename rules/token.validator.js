@@ -13,7 +13,10 @@ exports.config = {
       if(isTokenPresent) {
         resolve();
       } else {
-        reject();
+        reject({
+          status: 400,
+          message: 'Token not found'
+        });
       }
     });
   }

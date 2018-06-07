@@ -11,6 +11,10 @@ var RulesConfig = {
 	"rateLimit" : rateLimit.config
 };
 
+const promiseSerialify = funcs =>
+	funcs.reduce((promise, func) =>
+		promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([]))
+
 function execute(event, context, callback) {
 	const request = event.Records[0].cf.request;
 
@@ -28,77 +32,25 @@ function execute(event, context, callback) {
 	// 	context.done();
 	// }, 1000);
 
-	rulesToApply.push(RulesConfig["path"]);
-
-	while (rulesToApply.length > 0) {
-		// Sort the rules to apply based on priority
-		rulesToApply = util.sortRulesByPriority(rulesToApply);
-
-		console.log("Before rules.length::", rulesToApply.length);
-
-		// Extract highest priority rules for execution
-		var rule = rulesToApply.shift();
-
-		console.log("After rules.length::", rulesToApply.length);
-
-		// Execute rule
-		var result = rule.execute(request);
-
-		// Handle results after the rules execution
-		switch (rule['type']) {
-
-		case "path":
-			console.log("Rule path executed");
-
-			if (result === "INCLUDED") {
-				// if URL fall under inclusion list check for token and limit rules too
-
-				rulesToApply.push(RulesConfig["token"]);
-				rulesToApply.push(RulesConfig["queryLimit"]);
-				rulesToApply.push(RulesConfig["rateLimit"]);
-			} else if (result === "EXCLUDED") {
-				rulesToApply.push(RulesConfig["queryLimit"]);
-				rulesToApply.push(RulesConfig["rateLimit"]);
-			}
-
-			break;
-
-		case "token":
-			console.log("Rule token executed");
-
-			if (!result) {
-				setErrorFields(400, "JWT Token not present")
-				rulesToApply = [];
-				isErrorRequest = true;
-			}
-
-			break;
-
-		case "queryLimit":
-			console.log("Query Rule queryLimit executed");
-
-			if (result) {
-				setErrorFields(400, "Query params exceeded")
-				rulesToApply = [];
-				isErrorRequest = true;
-			}
-
-			break;
-
-		case "rateLimit":
-			console.log("What?");
-
-		default:
-			console.log("Alarm! Unknown rule got executed!");
-		}
+	var result = RulesConfig["path"].execute(request);
+	if (result === "INCLUDED") {
+		rulesToApply.push(RulesConfig["token"].execute.bind(RulesConfig["token"], request));
+		rulesToApply.push(RulesConfig["queryLimit"].execute.bind(RulesConfig["queryLimit"], request));
+	
+		//rulesToApply.push(RulesConfig["rateLimit"].execute);
+	} else if (result === "EXCLUDED") {
+		rulesToApply.push(RulesConfig["queryLimit"].execute.bind(RulesConfig["queryLimit"], request));
+		//rulesToApply.push(RulesConfig["rateLimit"].execute);
 	}
 
-	// 
-	if (isErrorRequest) {
-		callback(null, errorObj);
-	} else {
-		callback(null, request);
-	}
+	promiseSerialify(rulesToApply)
+		.then(() => {
+			console.log('All functions executed successfully');
+		})
+		.catch((err) => {
+			console.log(err);
+			console.log("There was a failure");
+		});
 }
 
 function setErrorFields(status, message) {
@@ -108,7 +60,7 @@ function setErrorFields(status, message) {
 
 (function main() {
 	var mockRequest = {
-		url : "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=11000",
+		url: "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd?limit=1000",
 		method : "GET",
 		headers : {
 			Authorization : "dsfgdsfg"

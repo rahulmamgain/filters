@@ -3,7 +3,7 @@ var util = require("../utils/utils");
 exports.config = {
   type: "queryLimit",
   config: {
-    "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize": 10000
+    "https://api.taylorandfrancis.com/v2/auth/user/auth/dfgsd?limit=11000": 10000
   },
   priority: 60,
   execute: function (req) {
@@ -62,7 +62,10 @@ exports.config = {
       }
 
       if(isError) {
-        reject();
+        reject({
+          status: 400,
+          message: 'Query parameter length reached'
+        });
       } else {
         resolve();
       }
