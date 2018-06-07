@@ -42,6 +42,10 @@ function execute(event, context, callback) {
 		console.log("After rules.length::", rulesToApply.length);
 
 		// Execute rule
+
+		/**
+		 * Isn't this returning a promise, and shouldn't we use then in this context, maybe i'm missing something here
+		 */
 		var result = rule.execute(request);
 
 		// Handle results after the rules execution
@@ -108,7 +112,7 @@ function setErrorFields(status, message) {
 
 (function main() {
 	var mockRequest = {
-		url : "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize?limit=11000",
+		url : "https://api.taylorandfrancis.com/v1/search/title?limit=11000",
 		method : "GET",
 		headers : {
 			Authorization : "dsfgdsfg"

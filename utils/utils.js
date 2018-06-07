@@ -26,7 +26,7 @@ function throwError() {
 function getClientIp(req) {
   var ipAddress;
   // The request may be forwarded from local web server.
-  var forwardedIpsStr = req.header('x-forwarded-for'); 
+  var forwardedIpsStr = req.header('x-forwarded-for') || req.connection.remoteAddress; 
   if (forwardedIpsStr) {
     // 'x-forwarded-for' header may return multiple IP addresses in
     // the format: "client IP, proxy 1 IP, proxy 2 IP" so take the

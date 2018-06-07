@@ -3,7 +3,7 @@ var util = require("../utils/utils");
 exports.config = {
   type: "queryLimit",
   config: {
-    "https://api.taylorandfrancis.com/v2/auth/user/auth/authorize": 10000
+    "https://api.taylorandfrancis.com/v1/search/title": 1000
   },
   priority: 60,
   execute: function (req) {
