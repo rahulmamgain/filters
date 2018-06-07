@@ -34,28 +34,38 @@ function execute(event, context, callback) {
 
 	var result = RulesConfig["path"].execute(request);
 	if (result === "INCLUDED") {
-		rulesToApply.push(RulesConfig["token"].execute.bind(RulesConfig["token"], request));
-		rulesToApply.push(RulesConfig["queryLimit"].execute.bind(RulesConfig["queryLimit"], request));
-	
+		rulesToApply.push(RulesConfig["queryLimit"]);
+		rulesToApply.push(RulesConfig["token"]);
+		
 		//rulesToApply.push(RulesConfig["rateLimit"].execute);
 	} else if (result === "EXCLUDED") {
-		rulesToApply.push(RulesConfig["queryLimit"].execute.bind(RulesConfig["queryLimit"], request));
+		rulesToApply.push(RulesConfig["queryLimit"]);
 		//rulesToApply.push(RulesConfig["rateLimit"].execute);
 	}
 
-	promiseSerialify(rulesToApply)
+	rulesToApply = util.sortRulesByPriority(rulesToApply);
+	var ruleFunctions = convertRulesToFunctionsAndBindRequest(rulesToApply, request);
+
+	promiseSerialify(ruleFunctions)
 		.then(() => {
 			console.log('All functions executed successfully');
+			rulesToApply = [];
+			callback(null, request);
 		})
 		.catch((err) => {
-			console.log(err);
-			console.log("There was a failure");
+			console.log('Failure');
+			rulesToApply = [];
+			callback(null, err);
 		});
 }
 
-function setErrorFields(status, message) {
-	errorObj.status = status;
-	errorObj.message = message;
+function convertRulesToFunctionsAndBindRequest(rulesToApply, request) {
+	var funcs = [];
+	rulesToApply.forEach((rule) => {
+		funcs.push(rule.execute.bind(rule, request));
+	})
+
+	return funcs;
 }
 
 (function main() {
